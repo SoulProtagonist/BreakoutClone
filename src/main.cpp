@@ -126,12 +126,23 @@ int main(int argc, char** argv)
 		paddle.Collide(left.getGlobalBounds());
 		paddle.Collide(right.getGlobalBounds());
 
+		typedef std::list<game::Block>::iterator block_iter;
+		for(block_iter iter = blocks.begin(); iter != blocks.end(); iter++)
+		{
+			iter->Collide(ball.GetAABB());
+			if(iter->isBlockHit())
+			{
+				ball.Collide(iter->GetAABB());
+				iter = blocks.erase(iter);
+				iter--;
+			}
+		}
+
 		App.clear();
 
 		ball.OnDraw(&App);
 		paddle.OnDraw(&App);
 
-		typedef std::list<game::Block>::iterator block_iter;
 		for(block_iter iter = blocks.begin(); iter != blocks.end(); iter++)
 		{
 			iter->OnDraw(&App);
