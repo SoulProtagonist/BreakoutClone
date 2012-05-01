@@ -27,7 +27,7 @@ PROJECT(breakout_clone)
 
 SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ../bin)
 
-FIND_PACKAGE(SFML COMPONENTS system window graphics)
+FIND_PACKAGE(SFML 2 COMPONENTS system window graphics)
 
 INCLUDE_DIRECTORIES(
 	../include
