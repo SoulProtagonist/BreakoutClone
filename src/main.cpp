@@ -59,8 +59,11 @@ void setupBlocks(std::list<game::Block>& list, int ScreenWidth)
 int main(int argc, char** argv)
 {
 	sf::RenderWindow App(sf::VideoMode(800, 600, 32), "Breakout Clone");
+	const int NUM_BALLS_TO_START=3;
+	int BallsLeft = NUM_BALLS_TO_START;
+	
 	game::Ball ball;
-	ball.SetVelocity(sf::Vector2f(400,400));
+	ball.SetVelocity(sf::Vector2f(300,300));
 	ball.SetPosition(App.getDefaultView().getCenter());
 	game::Paddle paddle;
 	paddle.SetVelocity(sf::Vector2f(0,0));
@@ -84,7 +87,7 @@ int main(int argc, char** argv)
 	top.setPosition(0, 0 - top.getSize().y);
 
 	sf::RectangleShape bottom = top;
-	top.setPosition(0, App.getDefaultView().getSize().y);
+	bottom.setPosition(0, App.getDefaultView().getSize().y);
 
 	sf::Clock clock;
 	clock.restart();
@@ -114,12 +117,31 @@ int main(int argc, char** argv)
 			}
 		}
 
+		if(BallsLeft <= 0)
+		{
+		        sf::Text text("Game Over!");
+			text.setPosition(App.getDefaultView().getCenter().x - text.getGlobalBounds().width/2, App.getDefaultView().getCenter().y - text.getGlobalBounds().height/2);
+			App.clear();
+			App.draw(text);
+			App.display();
+		        continue;
+		}
+
 		ball.UpdatePosition(time);
 		paddle.UpdatePosition(time);
 
+		// ball.Collide(bottom.getGlobalBounds());
+		// test if ball collides with the lowest boundary
+		// if it does reduce the number of balls the player
+		// has left by one
+		if(ball.GetAABB().intersects(bottom.getGlobalBounds()))
+		{
+		        BallsLeft--;
+			ball.SetPosition(sf::Vector2f(App.getDefaultView().getCenter().x, App.getDefaultView().getCenter().y));
+		}
+
 		ball.Collide(paddle.GetAABB());
 		ball.Collide(top.getGlobalBounds());
-		ball.Collide(bottom.getGlobalBounds());
 		ball.Collide(left.getGlobalBounds());
 		ball.Collide(right.getGlobalBounds());
 
