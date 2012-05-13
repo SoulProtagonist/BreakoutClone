@@ -28,6 +28,9 @@ along with BreakoutClone Source Code.  If not, see <http://www.gnu.org/licenses/
 #include "../include/Block.hpp"
 #include <list>
 
+const int SCREEN_WIDTH = 800;
+const int SCREEN_HEIGHT = 600;
+
 void setupBlocks(std::list<game::Block>& list, int ScreenWidth)
 {
 	list.clear();
@@ -58,36 +61,40 @@ void setupBlocks(std::list<game::Block>& list, int ScreenWidth)
 
 int main(int argc, char** argv)
 {
-	sf::RenderWindow App(sf::VideoMode(800, 600, 32), "Breakout Clone");
+	sf::RenderWindow App(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT, 32), "Breakout Clone");
 	const int NUM_BALLS_TO_START=3;
 	int BallsLeft = NUM_BALLS_TO_START;
-	
+	sf::View GameView(sf::FloatRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT));
+
+	// Set the view
+	App.setView(GameView);
+
 	game::Ball ball;
 	ball.SetVelocity(sf::Vector2f(300,300));
-	ball.SetPosition(App.getDefaultView().getCenter());
+	ball.SetPosition(App.getView().getCenter());
 	game::Paddle paddle;
 	paddle.SetVelocity(sf::Vector2f(0,0));
-	paddle.SetPosition(sf::Vector2f(App.getDefaultView().getCenter().x,
-			App.getDefaultView().getSize().y - 30));
+	paddle.SetPosition(sf::Vector2f(App.getView().getCenter().x,
+			App.getView().getSize().y - 30));
 
 	// create blocks
 	std::list<game::Block> blocks;
-	setupBlocks(blocks, App.getDefaultView().getSize().x);
+	setupBlocks(blocks, SCREEN_WIDTH);
 
 	// create boundaries for the screen
 	sf::RectangleShape left;
-	left.setSize(sf::Vector2f(10, App.getDefaultView().getSize().y));
+	left.setSize(sf::Vector2f(10, App.getView().getSize().y));
 	left.setPosition(0 - left.getSize().x, 0);
 
 	sf::RectangleShape right = left;
-	right.setPosition(App.getDefaultView().getSize().x, 0);
+	right.setPosition(App.getView().getSize().x, 0);
 
 	sf::RectangleShape top;
-	top.setSize(sf::Vector2f(App.getDefaultView().getSize().x, 10));
+	top.setSize(sf::Vector2f(App.getView().getSize().x, 10));
 	top.setPosition(0, 0 - top.getSize().y);
 
 	sf::RectangleShape bottom = top;
-	bottom.setPosition(0, App.getDefaultView().getSize().y);
+	bottom.setPosition(0, App.getView().getSize().y);
 
 	sf::Clock clock;
 	clock.restart();
@@ -120,7 +127,7 @@ int main(int argc, char** argv)
 		if(BallsLeft <= 0)
 		{
 		        sf::Text text("Game Over!");
-			text.setPosition(App.getDefaultView().getCenter().x - text.getGlobalBounds().width/2, App.getDefaultView().getCenter().y - text.getGlobalBounds().height/2);
+			text.setPosition(App.getView().getCenter().x - text.getGlobalBounds().width/2, App.getView().getCenter().y - text.getGlobalBounds().height/2);
 			App.clear();
 			App.draw(text);
 			App.display();
@@ -137,7 +144,7 @@ int main(int argc, char** argv)
 		if(ball.GetAABB().intersects(bottom.getGlobalBounds()))
 		{
 		        BallsLeft--;
-			ball.SetPosition(sf::Vector2f(App.getDefaultView().getCenter().x, App.getDefaultView().getCenter().y));
+			ball.SetPosition(sf::Vector2f(App.getView().getCenter().x, App.getView().getCenter().y));
 		}
 
 		ball.Collide(paddle.GetAABB());
