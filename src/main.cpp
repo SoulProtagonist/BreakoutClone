@@ -27,6 +27,7 @@ along with BreakoutClone Source Code.  If not, see <http://www.gnu.org/licenses/
 #include "../include/Paddle.hpp"
 #include "../include/Block.hpp"
 #include <list>
+#include <iostream>
 
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 600;
@@ -57,6 +58,28 @@ void setupBlocks(std::list<game::Block>& list, int ScreenWidth)
 		}
 		y += 35;
 	}
+}
+
+void resizeWindow(sf::RenderWindow * App)
+{
+    static const float viewRatio = (float)SCREEN_WIDTH / SCREEN_HEIGHT;
+    float windowRatio = (float)App->getSize().x / App->getSize().y;
+    std::cout << "viewRatio:" << viewRatio << " windowRatio:" << windowRatio << std::endl; 
+
+    sf::View newView = App->getView();
+    if(windowRatio > viewRatio)
+    {
+	newView.setViewport(sf::FloatRect((1 - (viewRatio/windowRatio))/2, 0, (viewRatio/windowRatio), 1));
+    } 
+    else if(viewRatio > windowRatio)
+    {
+	newView.setViewport(sf::FloatRect(0, (1 - (windowRatio/viewRatio))/2, 1, (windowRatio/viewRatio)));
+    }
+    else
+    {
+	newView.setViewport(sf::FloatRect(0, 0, 1, 1));
+    }
+    App->setView(newView);
 }
 
 int main(int argc, char** argv)
@@ -121,6 +144,14 @@ int main(int argc, char** argv)
 			{
 				if(evt.key.code == sf::Keyboard::Left || evt.key.code == sf::Keyboard::Right)
 					paddle.SetVelocity(sf::Vector2f(0,0));
+			}
+
+			if(evt.type == sf::Event::Resized)
+			{
+			    std::cout << "width:" << evt.size.width << " height:" << evt.size.height << std::endl;
+			    resizeWindow(&App);
+			    sf::FloatRect viewRect = App.getView().getViewport();
+			    std::cout << "vp.left:" << viewRect.left << " vp.top:" << viewRect.top << " vp.width:" << viewRect.width << " vp.height:" << viewRect.height << std::endl;
 			}
 		}
 
