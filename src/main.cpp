@@ -69,15 +69,15 @@ void resizeWindow(sf::RenderWindow * App)
     sf::View newView = App->getView();
     if(windowRatio > viewRatio)
     {
-	newView.setViewport(sf::FloatRect((1 - (viewRatio/windowRatio))/2, 0, (viewRatio/windowRatio), 1));
+		newView.setViewport(sf::FloatRect((1 - (viewRatio/windowRatio))/2, 0, (viewRatio/windowRatio), 1));
     } 
     else if(viewRatio > windowRatio)
     {
-	newView.setViewport(sf::FloatRect(0, (1 - (windowRatio/viewRatio))/2, 1, (windowRatio/viewRatio)));
+		newView.setViewport(sf::FloatRect(0, (1 - (windowRatio/viewRatio))/2, 1, (windowRatio/viewRatio)));
     }
     else
     {
-	newView.setViewport(sf::FloatRect(0, 0, 1, 1));
+		newView.setViewport(sf::FloatRect(0, 0, 1, 1));
     }
     App->setView(newView);
 }
