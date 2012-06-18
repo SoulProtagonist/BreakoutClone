@@ -86,7 +86,9 @@ int main(int argc, char** argv)
 {
 	sf::RenderWindow App(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT, 32), "Breakout Clone");
 	const int NUM_BALLS_TO_START=3;
-	int BallsLeft = NUM_BALLS_TO_START;
+	int BallsLeft = 0;
+	bool startGame = false;
+
 	sf::View GameView(sf::FloatRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT));
 
 	// Set the view
@@ -138,6 +140,7 @@ int main(int argc, char** argv)
 				if(evt.key.code == sf::Keyboard::Escape) App.close();
 				if(evt.key.code == sf::Keyboard::Left) paddle.SetVelocity(sf::Vector2f(-450, 0));
 				if(evt.key.code == sf::Keyboard::Right) paddle.SetVelocity(sf::Vector2f(450, 0));
+				if(evt.key.code == sf::Keyboard::Return) {startGame = true; BallsLeft = NUM_BALLS_TO_START;}
 			}
 
 			if(evt.type == sf::Event::KeyReleased)
@@ -155,14 +158,19 @@ int main(int argc, char** argv)
 			}
 		}
 
-		if(BallsLeft <= 0)
+		if(BallsLeft == 0)
 		{
-		        sf::Text text("Game Over!");
+			startGame = false;
+		}
+
+		if(startGame == false)
+		{
+			sf::Text text("Press \"return\" to start");
 			text.setPosition(App.getView().getCenter().x - text.getGlobalBounds().width/2, App.getView().getCenter().y - text.getGlobalBounds().height/2);
 			App.clear();
 			App.draw(text);
 			App.display();
-		        continue;
+		    continue;
 		}
 
 		ball.UpdatePosition(time);
@@ -187,14 +195,18 @@ int main(int argc, char** argv)
 		paddle.Collide(right.getGlobalBounds());
 
 		typedef std::list<game::Block>::iterator block_iter;
-		for(block_iter iter = blocks.begin(); iter != blocks.end(); iter++)
+		block_iter iter = blocks.begin();
+		while(iter != blocks.end())
 		{
 			iter->Collide(ball.GetAABB());
 			if(iter->isBlockHit())
 			{
 				ball.Collide(iter->GetAABB());
 				iter = blocks.erase(iter);
-				iter--;
+			}
+			else
+			{
+				iter++;
 			}
 		}
 

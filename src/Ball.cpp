@@ -59,28 +59,26 @@ namespace game {
     	// in the opposite direction of the velocity
     	while(m_sprite.getGlobalBounds().intersects(rect))
     	{
-    		float inc = -1/200.0f;
+    		float inc = -1/2000.0f;
     		m_sprite.setPosition(m_sprite.getPosition().x + (inc * vel.x), m_sprite.getPosition().y + (inc * vel.y));
     	}
 
     	// figure out whether it was a collision in x or y
     	float xdist;
-    	xdist = m_sprite.getGlobalBounds().left - (rect.left + rect.width);
-    	if((rect.left - (m_sprite.getGlobalBounds().left + m_sprite.getGlobalBounds().width)) < xdist)
+    	xdist = abs(m_sprite.getGlobalBounds().left - (rect.left + rect.width));
+    	if(abs((rect.left - (m_sprite.getGlobalBounds().left + m_sprite.getGlobalBounds().width))) < xdist)
     	{
-    		xdist = rect.left - (m_sprite.getGlobalBounds().left + m_sprite.getGlobalBounds().width);
+    		xdist = abs(rect.left - (m_sprite.getGlobalBounds().left + m_sprite.getGlobalBounds().width));
     	}
 
     	float ydist;
-    	ydist = m_sprite.getGlobalBounds().top - (rect.top + rect.height);
-    	if((rect.top - (m_sprite.getGlobalBounds().top + m_sprite.getGlobalBounds().height)) < ydist)
+    	ydist = abs(m_sprite.getGlobalBounds().top - (rect.top + rect.height));
+    	if(abs((rect.top - (m_sprite.getGlobalBounds().top + m_sprite.getGlobalBounds().height))) < ydist)
     	{
-    		ydist = rect.top - (m_sprite.getGlobalBounds().top + m_sprite.getGlobalBounds().height);
+    		ydist = abs(rect.top - (m_sprite.getGlobalBounds().top + m_sprite.getGlobalBounds().height));
     	}
 
     	// the smallest of xdist or ydist will specify which axis the collision was on
-    	if(xdist < 0) xdist *= -1;
-    	if(ydist < 0) ydist *= -1;
     	if(xdist < ydist)
     	{
     		SetVelocity(sf::Vector2f(-GetVelocity().x, GetVelocity().y));
