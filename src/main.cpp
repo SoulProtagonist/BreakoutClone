@@ -28,6 +28,7 @@ along with BreakoutClone Source Code.  If not, see <http://www.gnu.org/licenses/
 #include "../include/Block.hpp"
 #include <list>
 #include <iostream>
+#include <sstream>
 
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 600;
@@ -220,6 +221,14 @@ int main(int argc, char** argv)
 			iter->OnDraw(&App);
 		}
 
+		// add number of balls left to screen
+		std::stringstream sstr;
+		sstr << "Balls:" << BallsLeft;
+		sf::Text BallsLeftText(sstr.str());
+		BallsLeftText.setPosition(5.0f, 5.0f);
+		App.draw(BallsLeftText);
+
+		// display screen
 		App.display();
 	}
 
