@@ -23,9 +23,7 @@ along with BreakoutClone Source Code.  If not, see <http://www.gnu.org/licenses/
 */
 
 #include <SFML/Graphics.hpp>
-#include "../include/Ball.hpp"
-#include "../include/Paddle.hpp"
-#include "../include/Block.hpp"
+#include "../include/Level.hpp"
 #include <list>
 #include <iostream>
 #include <sstream>
@@ -34,34 +32,6 @@ const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 600;
 
 enum GAME_STATE{START, RUNNING, LOSE, WIN};
-
-void setupBlocks(std::list<game::Block>& list, int ScreenWidth)
-{
-    list.clear();
-    
-    // create a list of colors
-    std::list<sf::Color> color;
-    color.push_back(sf::Color::Blue);
-    color.push_back(sf::Color::Cyan);
-    color.push_back(sf::Color::Green);
-    color.push_back(sf::Color::Magenta);
-    color.push_back(sf::Color::Yellow);
-    color.push_back(sf::Color::Red);
-    
-    typedef std::list<sf::Color>::const_iterator list_c_iter;
-    // create blocks
-    int y = 0;
-    for(list_c_iter color_iter = color.begin(); color_iter != color.end(); color_iter++)
-    {
-	for(int x = 0; x < ScreenWidth - 95; x += 100 )
-	{
-	    game::Block blk(*color_iter);
-	    blk.SetPosition(sf::Vector2f(x + 5, y + 5));
-	    list.push_back(blk);
-	}
-	y += 35;
-    }
-}
 
 void resizeWindow(sf::RenderWindow * App)
 {
@@ -85,18 +55,9 @@ void resizeWindow(sf::RenderWindow * App)
     App->setView(newView);
 }
 
-void startScreen(sf::RenderWindow* const App)
+void writeScreen(sf::RenderWindow* const App, char const * str)
 {
-    sf::Text text("Press \"return\" to start");
-    text.setPosition(App->getView().getCenter().x - text.getGlobalBounds().width/2, App->getView().getCenter().y - text.getGlobalBounds().height/2);
-    App->clear();
-    App->draw(text);
-    App->display();
-}
-
-void loseScreen(sf::RenderWindow* const App)
-{
-    sf::Text text("Game Over");
+    sf::Text text(str);
     text.setPosition(App->getView().getCenter().x - text.getGlobalBounds().width/2, App->getView().getCenter().y - text.getGlobalBounds().height/2);
     App->clear();
     App->draw(text);
@@ -106,42 +67,16 @@ void loseScreen(sf::RenderWindow* const App)
 int main(int argc, char** argv)
 {
     sf::RenderWindow App(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT, 32), "Breakout Clone");
-    const int NUM_BALLS_TO_START=3;
-    int BallsLeft = NUM_BALLS_TO_START;
     GAME_STATE state = START;
   
     sf::View GameView(sf::FloatRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT));
   
     // Set the view
     App.setView(GameView);
-  
-    game::Ball ball;
-    ball.SetVelocity(sf::Vector2f(300,300));
-    ball.SetPosition(App.getView().getCenter());
-    game::Paddle paddle;
-    paddle.SetVelocity(sf::Vector2f(0,0));
-    paddle.SetPosition(sf::Vector2f(App.getView().getCenter().x,
-				    App.getView().getSize().y - 30));
-  
-    // create blocks
-    std::list<game::Block> blocks;
-    setupBlocks(blocks, SCREEN_WIDTH);
+
+    // Create level
+    game::Level level;
     
-    // create boundaries for the screen
-    sf::RectangleShape left;
-    left.setSize(sf::Vector2f(10, App.getView().getSize().y));
-    left.setPosition(0 - left.getSize().x, 0);
-  
-    sf::RectangleShape right = left;
-    right.setPosition(App.getView().getSize().x, 0);
-  
-    sf::RectangleShape top;
-    top.setSize(sf::Vector2f(App.getView().getSize().x, 10));
-    top.setPosition(0, 0 - top.getSize().y);
-  
-    sf::RectangleShape bottom = top;
-    bottom.setPosition(0, App.getView().getSize().y);
-  
     sf::Clock clock;
     clock.restart();
 
@@ -161,21 +96,14 @@ int main(int argc, char** argv)
 	    if(evt.type == sf::Event::KeyPressed)
 	    {
 		if(evt.key.code == sf::Keyboard::Escape) App.close();
-		if(evt.key.code == sf::Keyboard::Left) paddle.SetVelocity(sf::Vector2f(-450, 0));
-		if(evt.key.code == sf::Keyboard::Right) paddle.SetVelocity(sf::Vector2f(450, 0));
 		if(evt.key.code == sf::Keyboard::Return) 
 		{
 		    if(state == START)
 		    {
 			state = RUNNING; 
+			level.SetupScene(&App);
 		    }
 		}
-	    }
-	  
-	    if(evt.type == sf::Event::KeyReleased)
-	    {
-		if(evt.key.code == sf::Keyboard::Left || evt.key.code == sf::Keyboard::Right)
-		    paddle.SetVelocity(sf::Vector2f(0,0));
 	    }
 	    
 	    if(evt.type == sf::Event::Resized)
@@ -185,24 +113,22 @@ int main(int argc, char** argv)
 		sf::FloatRect viewRect = App.getView().getViewport();
 		std::cout << "vp.left:" << viewRect.left << " vp.top:" << viewRect.top << " vp.width:" << viewRect.width << " vp.height:" << viewRect.height << std::endl;
 	    }
-	}
-	
-	if(BallsLeft == 0)
-	{
-	    state = LOSE;
-	    gameOverClock.restart();
-	    BallsLeft = NUM_BALLS_TO_START;
+
+	    level.HandleEvents(&evt);
 	}
 	
 	if(state == START)
 	{
-	    startScreen(&App);
+	    writeScreen(&App, "Press \"return\" to start");
 	    continue;
 	}
 
-	if(state == LOSE)
+	if(state == LOSE || state == WIN)
 	{
-	    loseScreen(&App);
+	    if(state == LOSE)
+		writeScreen(&App, "Game Over");
+	    else
+		writeScreen(&App, "You Won");
 
 	    if(gameOverClock.getElapsedTime().asSeconds() > 10)
 	    {
@@ -211,62 +137,23 @@ int main(int argc, char** argv)
 
 	    continue;
 	}
-	
-	ball.UpdatePosition(time);
-	paddle.UpdatePosition(time);
-	
-	// ball.Collide(bottom.getGlobalBounds());
-	// test if ball collides with the lowest boundary
-	// if it does reduce the number of balls the player
-	// has left by one
-	if(ball.GetAABB().intersects(bottom.getGlobalBounds()))
+
+	if(level.HasPlayerLost())
 	{
-	    BallsLeft--;
-	    ball.SetPosition(sf::Vector2f(App.getView().getCenter().x, App.getView().getCenter().y));
+	    state = LOSE;
+	    gameOverClock.restart();
 	}
-	
-	ball.Collide(paddle.GetAABB());
-	ball.Collide(top.getGlobalBounds());
-	ball.Collide(left.getGlobalBounds());
-	ball.Collide(right.getGlobalBounds());
-	
-	paddle.Collide(left.getGlobalBounds());
-	paddle.Collide(right.getGlobalBounds());
-	
-	typedef std::list<game::Block>::iterator block_iter;
-	block_iter iter = blocks.begin();
-	while(iter != blocks.end())
+
+	if(level.HasPlayerWon())
 	{
-	    iter->Collide(ball.GetAABB());
-	    if(iter->isBlockHit())
-	    {
-		ball.Collide(iter->GetAABB());
-		iter = blocks.erase(iter);
-	    }
-	    else
-	    {
-		iter++;
-	    }
+	    state = WIN;
+	    gameOverClock.restart();
 	}
+
+	level.UpdatePosition(&App, &time);
 	
 	App.clear();
-	
-	ball.OnDraw(&App);
-	paddle.OnDraw(&App);
-	
-	for(block_iter iter = blocks.begin(); iter != blocks.end(); iter++)
-	{
-	    iter->OnDraw(&App);
-	}
-	
-	// add number of balls left to screen
-	std::stringstream sstr;
-	sstr << "Balls:" << BallsLeft;
-	sf::Text BallsLeftText(sstr.str());
-	BallsLeftText.setPosition(5.0f, 5.0f);
-	App.draw(BallsLeftText);
-	
-	// display screen
+	level.Draw(&App);
 	App.display();
     }
     

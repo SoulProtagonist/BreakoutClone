@@ -49,6 +49,7 @@ SET(SRC
 	../src/Entity.cpp
 	../src/main.cpp
 	../src/Paddle.cpp
+	../src/Level.cpp
 )
 
 ADD_EXECUTABLE(BreakoutClone 
