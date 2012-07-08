@@ -81,18 +81,19 @@ namespace game
     void Level::SetupScene(sf::RenderWindow const * const App)
     {
 	_ballsLeft = 3;
+	_yVelocity = 500;
 
 	// setup blocks
 	SetupBlocks(App->getSize().x);
-
-	// set ball position and velocity
-	_ball.SetVelocity(sf::Vector2f(300,300));
-	_ball.SetPosition(App->getView().getCenter());
 
 	// set paddle position and velocity
 	_paddle.SetVelocity(sf::Vector2f(0,0));
 	_paddle.SetPosition(sf::Vector2f(App->getView().getCenter().x,
 					 App->getView().getSize().y - 30));
+
+	// set ball position and velocity
+	_ball.SetVelocity(sf::Vector2f(0,_yVelocity));
+	_ball.SetPosition(App->getView().getCenter());
 
 	// setup bounds
 	SetupBounds(&App->getView().getSize());
@@ -125,6 +126,20 @@ namespace game
 	{
 	    _ballsLeft--;
 	    _ball.SetPosition(sf::Vector2f(App->getView().getCenter().x, App->getView().getCenter().y));
+
+	    // send ball towards paddle
+	    sf::Vector2f vel;
+	    vel.y = _yVelocity;
+	    
+	    // work out x component neccessary to send ball toward paddle
+	    sf::Vector2f dist;
+	    dist.y = _paddle.GetAABB().top - _ball.GetAABB().top;
+	    dist.x = (_paddle.GetAABB().left + _paddle.GetAABB().width/2) - _ball.GetAABB().left;
+
+	    float time = dist.y / vel.y;
+	    vel.x = dist.x / time;
+
+	    _ball.SetVelocity(vel);
 	}
 	iter++;
 	

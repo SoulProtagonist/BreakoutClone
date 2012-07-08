@@ -79,13 +79,27 @@ namespace game {
     	}
 
     	// the smallest of xdist or ydist will specify which axis the collision was on
-    	if(xdist < ydist)
-    	{
-    		SetVelocity(sf::Vector2f(-GetVelocity().x, GetVelocity().y));
+	sf::Vector2f velocity(GetVelocity().x, GetVelocity().y);
+	if(xdist < ydist)
+	{
+	    velocity.x *= -1;
+	    SetVelocity(velocity);
     	}
     	else
     	{
-    		SetVelocity(sf::Vector2f(GetVelocity().x, -GetVelocity().y));
+	    velocity.y *= -1;
+	    
+	    int end_length = rect.width / 10;
+	    if(m_sprite.getGlobalBounds().left < (rect.left + end_length))
+	    {
+		velocity.x -= 200;
+	    }
+	    else if((m_sprite.getGlobalBounds().left + m_sprite.getGlobalBounds().width) > ((rect.left + rect.width) - end_length))
+	    {
+		velocity.x += 200;
+	    }
+
+	    SetVelocity(velocity);
     	}
     }
 

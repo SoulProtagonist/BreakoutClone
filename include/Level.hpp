@@ -41,6 +41,7 @@ namespace game
 	std::list<Block> _blocks;
 	std::list<sf::RectangleShape> _bounds;
 	int _ballsLeft;
+	int _yVelocity;
 
 	void SetupBlocks(int width);
 	void SetupBounds(sf::Vector2f const * const extents);
